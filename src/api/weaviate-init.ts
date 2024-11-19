@@ -290,9 +290,7 @@ async function initWeaviate() {
 		} else {
 			console.log("BotWCompendium collection already exists");
 
-			searchCompendium(client, "items with the most hearts recovered").catch(
-				console.error
-			);
+			searchCompendium(client, "a sword").catch(console.error);
 		}
 	} catch (error) {
 		console.error("Error setting up Weaviate collection:", error);
