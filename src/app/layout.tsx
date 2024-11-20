@@ -1,7 +1,6 @@
 import ApplicationBar from "@/components/ApplicationBar/ApplicationBar";
 import ThemeRegistry from "@/components/ThemeRegistry/ThemeRegistry";
-import { Suspense } from "react";
-import Loading from "./loading";
+import { CompendiumProvider } from "@/app/providers/CompendiumProvider";
 
 export const metadata = {
 	title: "Zelda Compendium",
@@ -16,10 +15,12 @@ export default function RootLayout({
 	return (
 		<html lang="en">
 			<body>
-				<ThemeRegistry>
-					<ApplicationBar />
-					<Suspense fallback={<Loading />}>{children}</Suspense>
-				</ThemeRegistry>
+				<CompendiumProvider>
+					<ThemeRegistry>
+						<ApplicationBar />
+						{children}
+					</ThemeRegistry>
+				</CompendiumProvider>
 			</body>
 		</html>
 	);

@@ -37,9 +37,23 @@ const searchCompendium = async (
 	const generativeResult = await collection.generate.nearText(
 		query,
 		{
-			singlePrompt: "Describe this {name}. It {description}",
-			groupedTask: "Summarize these items: {name} - {description}",
-			groupedProperties: ["name", "description"]
+			groupedTask: `Broadly describe the group of objects in 1-2 sentences. Don't list every item in the group, but rather describe the group as a whole, and tie it in to the query if you can: 
+                {name} - {description}
+                {_exists_: attack ? 'Attack: ' + {attack} : ''}
+                {_exists_: defense ? 'Defense: ' + {defense} : ''}
+                {_exists_: heartsRecovered ? 'Hearts Recovered: ' + {heartsRecovered} : ''}
+                {_exists_: cookingEffect ? 'Cooking Effect: ' + {cookingEffect} : ''}
+                {_exists_: edible ? 'Edible: ' + {edible} : ''}`,
+			groupedProperties: [
+				"name",
+				"description",
+				"category",
+				"attack",
+				"defense",
+				"heartsRecovered",
+				"cookingEffect",
+				"edible"
+			]
 		},
 		{
 			limit: limit,

@@ -3,28 +3,26 @@
 import { Search as SearchIcon } from "@mui/icons-material";
 import { CircularProgress, InputAdornment, TextField } from "@mui/material";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
-import { useTransition } from "react";
+import { useCompendiumContext } from "@/app/contexts/CompendiumContext";
 
 export default function SearchBar() {
 	const router = useRouter();
 	const pathname = usePathname();
 	const searchParams = useSearchParams();
-	const [isPending, startTransition] = useTransition();
+	const { isLoading } = useCompendiumContext();
 
 	const handleSearch = (event: React.KeyboardEvent<HTMLInputElement>) => {
 		if (event.key === "Enter") {
-			startTransition(() => {
-				const value = (event.target as HTMLInputElement).value.trim();
+			const value = (event.target as HTMLInputElement).value.trim();
 
-				const params = new URLSearchParams();
-				if (value) {
-					params.set("query", value);
+			const params = new URLSearchParams(searchParams);
+			if (value) {
+				params.set("query", value);
+			} else {
+				params.delete("query");
+			}
 
-					router.push(`${pathname}?${params.toString()}`, {
-						scroll: false
-					});
-				}
-			});
+			router.push(`${pathname}?${params.toString()}`);
 		}
 	};
 
@@ -35,11 +33,11 @@ export default function SearchBar() {
 			size="small"
 			onKeyDown={handleSearch}
 			defaultValue={searchParams.get("query") ?? ""}
-			disabled={isPending}
+			disabled={isLoading}
 			InputProps={{
 				startAdornment: (
 					<InputAdornment position="start">
-						{isPending ? (
+						{isLoading ? (
 							<CircularProgress size={20} color="inherit" />
 						) : (
 							<SearchIcon sx={{ color: "primary.contrastText" }} />

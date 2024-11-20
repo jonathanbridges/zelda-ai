@@ -20,7 +20,7 @@ const SkeletonCard = () => (
 	</Grid>
 );
 
-export default function Loading() {
+export default function CompendiumLoader() {
 	return (
 		<Container maxWidth="lg">
 			<Skeleton variant="text" width="60%" height={32} />

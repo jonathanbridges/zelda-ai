@@ -53,32 +53,17 @@ export default function CompendiumCard({ item }: CompendiumCardProps) {
 							}}
 						/>
 					</Box>
-					{(category === Category.EQUIPMENT ||
-						category === Category.MATERIALS) && (
-						<Box
-							sx={{
-								position: "absolute",
-								bottom: 0,
-								left: 0,
-								right: 0,
-								padding: 1
-							}}
-						>
-							<ItemStats
-								attack={
-									category === Category.EQUIPMENT ? item.attack : undefined
-								}
-								defense={
-									category === Category.EQUIPMENT ? item.defense : undefined
-								}
-								heartsRecovered={
-									category === Category.MATERIALS
-										? item.heartsRecovered
-										: undefined
-								}
-							/>
-						</Box>
-					)}
+					<Box
+						sx={{
+							position: "absolute",
+							bottom: 0,
+							left: 0,
+							right: 0,
+							padding: 1
+						}}
+					>
+						<ItemStats item={item} />
+					</Box>
 				</Box>
 				<CardContent>
 					<Typography
