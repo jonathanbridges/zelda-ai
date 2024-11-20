@@ -1,14 +1,16 @@
+import { Category } from "@/enums";
 import { CompendiumItem } from "@/types";
 import {
+	Box,
 	Card,
 	CardActionArea,
-	Typography,
 	CardContent,
 	CardMedia,
-	Box
+	Typography
 } from "@mui/material";
 import Image from "next/image";
 import CategoryIcon from "../CategoryIcon/CategoryIcon";
+import ItemStats from "../ItemStats/ItemStats";
 
 interface CompendiumCardProps {
 	item: CompendiumItem;
@@ -18,11 +20,17 @@ export default function CompendiumCard({ item }: CompendiumCardProps) {
 	const { name, description, image, category } = item;
 
 	return (
-		<Card sx={{ maxWidth: 345 }}>
+		<Card>
 			<CardActionArea>
 				<Box sx={{ position: "relative" }}>
 					<CardMedia sx={{ position: "relative", height: 200 }}>
-						<Image alt={name} src={image} fill style={{ objectFit: "cover" }} />
+						<Image
+							alt={name}
+							src={image}
+							fill
+							style={{ objectFit: "cover" }}
+							sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+						/>
 					</CardMedia>
 					<Box
 						sx={{
@@ -45,9 +53,40 @@ export default function CompendiumCard({ item }: CompendiumCardProps) {
 							}}
 						/>
 					</Box>
+					{(category === Category.EQUIPMENT ||
+						category === Category.MATERIALS) && (
+						<Box
+							sx={{
+								position: "absolute",
+								bottom: 0,
+								left: 0,
+								right: 0,
+								padding: 1
+							}}
+						>
+							<ItemStats
+								attack={
+									category === Category.EQUIPMENT ? item.attack : undefined
+								}
+								defense={
+									category === Category.EQUIPMENT ? item.defense : undefined
+								}
+								heartsRecovered={
+									category === Category.MATERIALS
+										? item.heartsRecovered
+										: undefined
+								}
+							/>
+						</Box>
+					)}
 				</Box>
 				<CardContent>
-					<Typography gutterBottom variant="h5" component="div">
+					<Typography
+						gutterBottom
+						variant="h5"
+						component="div"
+						textTransform="capitalize"
+					>
 						{name}
 					</Typography>
 					<Typography variant="body2" color="text.secondary">

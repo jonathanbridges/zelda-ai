@@ -50,7 +50,6 @@ export type APIEntryItem =
 /* Begin Weaviate Schema Types */
 export interface CommonItemProperties {
 	name: string;
-	category: Category;
 	itemId: number;
 	description: string;
 	image: string;
@@ -60,6 +59,7 @@ export interface CommonItemProperties {
 }
 
 interface EquipmentItem extends CommonItemProperties {
+	category: Category.EQUIPMENT;
 	attack: number;
 	defense: number;
 	effect: string | null;
@@ -67,17 +67,21 @@ interface EquipmentItem extends CommonItemProperties {
 }
 
 interface MaterialItem extends CommonItemProperties {
+	category: Category.MATERIALS;
 	heartsRecovered: number;
 	cookingEffect: string;
 	fuseAttackPower: number | null;
 }
 
 interface CreatureItem extends CommonItemProperties {
+	category: Category.CREATURES;
 	edible: boolean;
 	heartsRecovered: number | null;
 }
 
-type TreasureItem = CommonItemProperties;
+interface TreasureItem extends CommonItemProperties {
+	category: Category.TREASURE;
+}
 
 export type CompendiumItem =
 	| EquipmentItem

@@ -45,7 +45,6 @@ async function importCompendiumData(client: WeaviateClient) {
 			} = apiEntryItem;
 
 			const commonItemProperties: CommonItemProperties = {
-				category,
 				name,
 				description,
 				itemId: id,
@@ -62,6 +61,7 @@ async function importCompendiumData(client: WeaviateClient) {
 					} = apiEntryItem;
 					return {
 						...commonItemProperties,
+						category,
 						attack,
 						defense,
 						effect: effect || null,
@@ -71,6 +71,7 @@ async function importCompendiumData(client: WeaviateClient) {
 					const { cooking_effect, fuse_attack_power } = apiEntryItem;
 					return {
 						...commonItemProperties,
+						category,
 						heartsRecovered: apiEntryItem.hearts_recovered,
 						cookingEffect: cooking_effect,
 						fuseAttackPower: fuse_attack_power || null
@@ -79,13 +80,14 @@ async function importCompendiumData(client: WeaviateClient) {
 					const { edible, hearts_recovered } = apiEntryItem;
 					return {
 						...commonItemProperties,
+						category,
 						edible,
 						heartsRecovered: hearts_recovered || null
 					};
 				case Category.TREASURE:
-					return commonItemProperties;
+					return { ...commonItemProperties, category };
 				default:
-					return commonItemProperties;
+					return { ...commonItemProperties, category };
 			}
 		});
 
@@ -247,7 +249,15 @@ export async function searchCompendium(
 			{
 				singlePrompt: "Describe this {name}. It {description}",
 				groupedTask: "Summarize these items: {name} - {description}",
-				groupedProperties: ["name", "description"]
+				groupedProperties: [
+					"name",
+					"description",
+					"category",
+					"heartsRecovered",
+					"attack",
+					"defense",
+					"edible"
+				]
 			},
 			{
 				limit: limit,
