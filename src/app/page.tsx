@@ -1,34 +1,38 @@
 import { Suspense } from "react";
 import Loading from "./loading";
 
+import CategoryTabs from "@/components/CategoryTabs/CategoryTabs";
 import CompendiumCard from "@/components/CompendiumCard/CompendiumCard";
-import { CompendiumItem } from "@/types";
+import { CompendiumItem, SearchParams } from "@/types";
 import { Container, Typography } from "@mui/material";
 import Grid from "@mui/material/Grid2";
 import { GenerativeObject, GenerativeReturn } from "weaviate-client";
 
-/**
- * Fetches compendium items based on a search query.
- *
- * @param query - The search term to filter compendium items
- * @returns An object containing:
- *          - header: A generated description of the search results
- *          - objects: An array of compendium items matching the search query
- *
- * @remarks
- * - Makes a GET request to the /api/search endpoint
- * - Results are limited to 10 items per request
- * - Response is force-cached to improve performance
- * - Returns empty arrays/strings if the request fails
- */
+const constructSearchUrl = (
+	query: string = "a sword",
+	category: string | null = null,
+	offset: number | null = null,
+	limit: number | null = null
+): string => {
+	const url = new URL("/api/search", process.env.APP_URL);
+	url.searchParams.append("query", query);
+	if (limit !== null) url.searchParams.append("limit", limit.toString());
+	if (offset !== null) url.searchParams.append("offset", offset.toString());
+	if (category !== null) url.searchParams.append("category", category);
+	return url.toString();
+};
+
 const getCompendiumItems = async (
-	query: string
+	query: string = "a sword",
+	category: string | null = null,
+	offset: number | null = null,
+	limit: number | null = null
 ): Promise<{
 	header: string;
 	objects: GenerativeObject<CompendiumItem>[];
 }> => {
 	const result = await fetch(
-		`${process.env.APP_URL}/api/search?query=${query}&limit=10&offset=0`,
+		constructSearchUrl(query, category, offset, limit),
 		{ method: "GET", cache: "force-cache" }
 	);
 	const data: GenerativeReturn<CompendiumItem> = await result.json();
@@ -41,11 +45,7 @@ const getCompendiumItems = async (
 	return { header: "", objects: [] };
 };
 
-export default function Page({
-	searchParams
-}: {
-	searchParams: { query: string };
-}) {
+export default function Page({ searchParams }: { searchParams: SearchParams }) {
 	return (
 		<Suspense fallback={<Loading />}>
 			<PageContent searchParams={searchParams} />
@@ -53,17 +53,19 @@ export default function Page({
 	);
 }
 
-async function PageContent({
-	searchParams
-}: {
-	searchParams: { query: string };
-}) {
-	const { query } = await searchParams;
-	const { header, objects } = await getCompendiumItems(query ?? "a sword");
+async function PageContent({ searchParams }: { searchParams: SearchParams }) {
+	const { query, category, offset, limit } = await searchParams;
+	const { header, objects } = await getCompendiumItems(
+		query,
+		category,
+		offset,
+		limit
+	);
 
 	return (
 		<Container maxWidth="lg">
 			<Typography variant="subtitle1">{header}</Typography>
+			<CategoryTabs />
 			<Grid container spacing={2} sx={{ mt: 2 }}>
 				{objects.map((object: GenerativeObject<CompendiumItem>) => (
 					<Grid

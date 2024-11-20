@@ -19,11 +19,11 @@ export default function SearchBar() {
 				const params = new URLSearchParams();
 				if (value) {
 					params.set("query", value);
-				}
 
-				const queryString = params.toString();
-				const newUrl = queryString ? `${pathname}?${queryString}` : pathname;
-				router.push(newUrl);
+					router.push(`${pathname}?${params.toString()}`, {
+						scroll: false
+					});
+				}
 			});
 		}
 	};

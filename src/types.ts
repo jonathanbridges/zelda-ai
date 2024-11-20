@@ -96,3 +96,10 @@ export type CompendiumCollection = Collection<
 	"BotWCompendium"
 >;
 /* End Weaviate Schema Types */
+
+export interface SearchParams {
+	query: string;
+	category?: Category;
+	offset?: number;
+	limit?: number;
+}

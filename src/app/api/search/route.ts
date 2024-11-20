@@ -1,6 +1,11 @@
+import { Category } from "@/enums";
 import { CompendiumCollection, CompendiumCollectionType } from "@/types";
 import { NextRequest, NextResponse } from "next/server";
-import weaviate, { GenerativeReturn, WeaviateClient } from "weaviate-client";
+import weaviate, {
+	FilterValue,
+	GenerativeReturn,
+	WeaviateClient
+} from "weaviate-client";
 
 const weaviateURL = process.env.WEAVIATE_URL as string;
 const weaviateKey = process.env.WEAVIATE_ADMIN_KEY as string;
@@ -9,7 +14,8 @@ const openaiKey = process.env.OPENAI_API_KEY as string;
 const searchCompendium = async (
 	query: string,
 	limit: number = 10,
-	offset: number = 0
+	offset: number = 0,
+	category: Category | null = null
 ) => {
 	const client: WeaviateClient = await weaviate.connectToWeaviateCloud(
 		weaviateURL,
@@ -23,6 +29,11 @@ const searchCompendium = async (
 	const collection: CompendiumCollection =
 		client.collections.get("BotWCompendium");
 
+	let filter: FilterValue | null = null;
+	if (!!category) {
+		filter = collection.filter.byProperty("category").like(category);
+	}
+
 	const generativeResult = await collection.generate.nearText(
 		query,
 		{
@@ -32,7 +43,8 @@ const searchCompendium = async (
 		},
 		{
 			limit: limit,
-			offset: offset
+			offset: offset,
+			...(!!filter && { filters: filter })
 		}
 	);
 
@@ -46,6 +58,7 @@ export async function GET(request: NextRequest) {
 	const query = searchParams.get("query");
 	const limit = searchParams.get("limit");
 	const offset = searchParams.get("offset");
+	const category = searchParams.get("category") as Category | null;
 
 	if (!query) {
 		return NextResponse.json(
@@ -59,7 +72,8 @@ export async function GET(request: NextRequest) {
 			await searchCompendium(
 				query ? query : "cool swords",
 				limit ? parseInt(limit) : 10,
-				offset ? parseInt(offset) : 0
+				offset ? parseInt(offset) : 0,
+				category ? category : null
 			);
 
 		if (results instanceof Error) {
