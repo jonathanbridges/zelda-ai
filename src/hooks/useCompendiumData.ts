@@ -1,16 +1,11 @@
 "use client";
 
-import { CompendiumItem } from "@/types";
-import { GenerativeObject } from "weaviate-client";
+import { CompendiumData, CompendiumItem } from "@/types";
 import { useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
 import { useCompendiumContext } from "@/app/contexts/CompendiumContext";
 import { fetchCompendiumData } from "@/lib/api";
-
-type CompendiumData = {
-	header: string;
-	objects: GenerativeObject<CompendiumItem>[];
-};
+import { Category, URLParams } from "@/enums";
 
 export function useCompendiumData() {
 	const searchParams = useSearchParams();
@@ -26,13 +21,15 @@ export function useCompendiumData() {
 				setIsLoading(true);
 				setError(null);
 
-				const result = await fetchCompendiumData({
-					query: searchParams.get("query") || undefined,
-					category: searchParams.get("category") || undefined,
-					limit: Number(searchParams.get("limit")) || undefined,
-					offset: Number(searchParams.get("offset")) || undefined
-				});
+				const category = searchParams.get(URLParams.CATEGORY);
+				const query = searchParams.get(URLParams.QUERY);
+				const page = searchParams.get(URLParams.PAGE);
 
+				const result = await fetchCompendiumData({
+					...(category && { [URLParams.CATEGORY]: category as Category }),
+					...(query && { [URLParams.QUERY]: query }),
+					...(page && { [URLParams.PAGE]: parseInt(page) })
+				});
 				if (isMounted) {
 					setData(result);
 				}

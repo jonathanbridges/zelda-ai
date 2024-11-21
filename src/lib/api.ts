@@ -1,47 +1,48 @@
-import { CompendiumItem } from "@/types";
-import { GenerativeObject, GenerativeReturn } from "weaviate-client";
+import { CompendiumData, QueryParams } from "@/types";
+import { URLParams } from "@/enums";
 
-type CompendiumData = {
-	header: string;
-	objects: GenerativeObject<CompendiumItem>[];
-};
-
-type SearchParams = {
-	query?: string;
-	category?: string;
-	limit?: number;
-	offset?: number;
-};
-
-function buildUrl(params: SearchParams = {}): string {
+function buildUrl(params: QueryParams = {}): string {
 	const baseUrl = process.env.NEXT_PUBLIC_API_URL || "";
-	const { query, category, limit = 20, offset = 0 } = params;
+	const {
+		[URLParams.QUERY]: query,
+		[URLParams.CATEGORY]: category,
+		[URLParams.PAGE]: page = 1
+	} = params;
 
 	// Only use search endpoint if there's a query
-	if (query?.trim()) {
+	if (query?.toString().trim()) {
 		const searchParams = new URLSearchParams();
-		searchParams.set("query", encodeURIComponent(query));
-		if (category?.trim())
-			searchParams.set("category", encodeURIComponent(category));
-		searchParams.set("limit", encodeURIComponent(limit.toString()));
-		searchParams.set("offset", encodeURIComponent(offset.toString()));
+		searchParams.set(URLParams.QUERY, encodeURIComponent(query.toString()));
+		if (category?.toString().trim()) {
+			searchParams.set(
+				URLParams.CATEGORY,
+				encodeURIComponent(category.toString())
+			);
+		}
+		searchParams.set(URLParams.PAGE, page.toString());
 		return `${baseUrl}/api/search?${searchParams.toString()}`;
 	}
 
 	// Use base endpoint for everything else
 	const baseParams = new URLSearchParams();
-	if (category?.trim())
-		baseParams.set("category", encodeURIComponent(category));
-	baseParams.set("limit", limit.toString());
-	baseParams.set("offset", offset.toString());
+	if (category?.toString().trim()) {
+		baseParams.set(URLParams.CATEGORY, encodeURIComponent(category.toString()));
+	}
+	baseParams.set(URLParams.PAGE, page.toString());
 	return `${baseUrl}/api?${baseParams.toString()}`;
 }
 
 export async function fetchCompendiumData(
-	params: SearchParams = {}
+	params: QueryParams = {}
 ): Promise<CompendiumData> {
 	const url = buildUrl(params);
-	const response = await fetch(url);
+
+	const response = await fetch(url, {
+		// Re-enable caching but revalidate frequently
+		next: {
+			revalidate: 60 // Revalidate cache every 60 seconds
+		}
+	});
 
 	if (!response.ok) {
 		throw new Error(`HTTP error! status: ${response.status}`);
@@ -50,6 +51,7 @@ export async function fetchCompendiumData(
 	const data = await response.json();
 	return {
 		header: data.generated ?? "",
-		objects: data.objects
+		objects: data.objects,
+		totalCount: data.totalCount
 	};
 }

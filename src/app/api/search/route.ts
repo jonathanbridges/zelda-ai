@@ -1,5 +1,5 @@
-import { Category } from "@/enums";
-import { CompendiumCollection, CompendiumCollectionType } from "@/types";
+import { Category, URLParams } from "@/enums";
+import { CompendiumCollectionType, ITEMS_PER_PAGE } from "@/types";
 import { NextRequest, NextResponse } from "next/server";
 import weaviate, {
 	FilterValue,
@@ -13,7 +13,6 @@ const openaiKey = process.env.OPENAI_API_KEY as string;
 
 const searchCompendium = async (
 	query: string = "",
-	limit: number = 10,
 	offset: number = 0,
 	category: Category | null = null
 ) => {
@@ -33,45 +32,54 @@ const searchCompendium = async (
 		filter = collection.filter.byProperty("category").like(category);
 	}
 
-	const generativeResult = await collection.generate.nearText(
-		query,
-		{
-			groupedTask: `Broadly describe the group of objects in 1-2 sentences. Don't list every item in the group, but rather describe the group as a whole, and tie it in to the query if you can: 
+	const { totalCount } = await collection.aggregate.nearText(query, {
+		...(!!filter && { filters: filter }),
+		objectLimit: 1000
+	});
+
+	const groupedTask = `Broadly describe the group of objects in 1-2 sentences and answer the query if it's a question. Don't list every item in the group, but rather describe the group as a whole: 
                 {name} - {description}
                 {_exists_: attack ? 'Attack: ' + {attack} : ''}
                 {_exists_: defense ? 'Defense: ' + {defense} : ''}
                 {_exists_: heartsRecovered ? 'Hearts Recovered: ' + {heartsRecovered} : ''}
                 {_exists_: cookingEffect ? 'Cooking Effect: ' + {cookingEffect} : ''}
-                {_exists_: edible ? 'Edible: ' + {edible} : ''}`,
-			groupedProperties: [
-				"name",
-				"description",
-				"category",
-				"attack",
-				"defense",
-				"heartsRecovered",
-				"cookingEffect",
-				"edible"
-			]
+                {_exists_: edible ? 'Edible: ' + {edible} : ''}`;
+	const groupedProperties = [
+		"name",
+		"description",
+		"attack",
+		"defense",
+		"heartsRecovered",
+		"cookingEffect",
+		"edible"
+	];
+
+	const generativeResult = await collection.generate.nearText(
+		query,
+		{
+			groupedTask,
+			groupedProperties
 		},
 		{
-			limit: limit,
+			limit: ITEMS_PER_PAGE,
 			offset: offset,
 			...(!!filter && { filters: filter })
 		}
 	);
-
-	return generativeResult;
+	return { ...generativeResult, totalCount };
 };
 
 export async function GET(request: NextRequest) {
 	const url = new URL(request.url, "http://localhost:3000");
 	const searchParams = url.searchParams;
 
-	const query = searchParams.get("query");
-	const limit = searchParams.get("limit");
-	const offset = searchParams.get("offset");
-	const category = searchParams.get("category") as Category | null;
+	const query = searchParams.get(URLParams.QUERY);
+	const page = Math.max(1, Number(searchParams.get(URLParams.PAGE)) || 1);
+	const category = searchParams.get(URLParams.CATEGORY) as Category | null;
+
+	// Calculate offset from page
+	const limit = ITEMS_PER_PAGE;
+	const offset = (page - 1) * limit;
 
 	if (!query) {
 		return NextResponse.json(
@@ -82,12 +90,7 @@ export async function GET(request: NextRequest) {
 
 	try {
 		const results: GenerativeReturn<CompendiumCollectionType> =
-			await searchCompendium(
-				query ? query : "cool swords",
-				limit ? parseInt(limit) : 10,
-				offset ? parseInt(offset) : 0,
-				category ? category : null
-			);
+			await searchCompendium(query, offset, category ? category : null);
 
 		if (results instanceof Error) {
 			return NextResponse.json({ error: results.message }, { status: 500 });

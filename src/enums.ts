@@ -5,3 +5,9 @@ export enum Category {
 	CREATURES = "creatures",
 	TREASURE = "treasure"
 }
+
+export enum URLParams {
+	QUERY = "query",
+	CATEGORY = "category",
+	PAGE = "page"
+}

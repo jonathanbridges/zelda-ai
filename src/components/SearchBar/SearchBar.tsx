@@ -1,68 +1,83 @@
 "use client";
 
-import { Search as SearchIcon } from "@mui/icons-material";
-import { CircularProgress, InputAdornment, TextField } from "@mui/material";
-import { usePathname, useRouter, useSearchParams } from "next/navigation";
-import { useCompendiumContext } from "@/app/contexts/CompendiumContext";
+import { styled, alpha } from "@mui/material/styles";
+import InputBase from "@mui/material/InputBase";
+import SearchIcon from "@mui/icons-material/Search";
+import { useCallback } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
+import { URLParams } from "@/enums";
+import { useDebounce } from "@/hooks/useDebounce";
+
+const Search = styled("div")(({ theme }) => ({
+	position: "relative",
+	borderRadius: theme.shape.borderRadius,
+	backgroundColor: alpha(theme.palette.common.white, 0.15),
+	"&:hover": {
+		backgroundColor: alpha(theme.palette.common.white, 0.25)
+	},
+	marginRight: theme.spacing(2),
+	marginLeft: 0,
+	width: "100%",
+	[theme.breakpoints.up("sm")]: {
+		marginLeft: theme.spacing(3),
+		width: "auto"
+	}
+}));
+
+const SearchIconWrapper = styled("div")(({ theme }) => ({
+	padding: theme.spacing(0, 2),
+	height: "100%",
+	position: "absolute",
+	pointerEvents: "none",
+	display: "flex",
+	alignItems: "center",
+	justifyContent: "center"
+}));
+
+const StyledInputBase = styled(InputBase)(({ theme }) => ({
+	color: "inherit",
+	width: "100%",
+	"& .MuiInputBase-input": {
+		padding: theme.spacing(1, 1, 1, 0),
+		paddingLeft: `calc(1em + ${theme.spacing(4)})`,
+		transition: theme.transitions.create("width"),
+		width: "100%",
+		[theme.breakpoints.up("md")]: {
+			width: "50ch"
+		}
+	}
+}));
 
 export default function SearchBar() {
 	const router = useRouter();
-	const pathname = usePathname();
 	const searchParams = useSearchParams();
-	const { isLoading } = useCompendiumContext();
 
-	const handleSearch = (event: React.KeyboardEvent<HTMLInputElement>) => {
-		if (event.key === "Enter") {
-			const value = (event.target as HTMLInputElement).value.trim();
+	const updateSearch = useCallback(
+		(searchText: string) => {
+			const params = new URLSearchParams();
 
-			const params = new URLSearchParams(searchParams);
-			if (value) {
-				params.set("query", value);
-			} else {
-				params.delete("query");
+			if (searchText.trim()) {
+				params.set(URLParams.QUERY, searchText);
 			}
 
-			router.push(`${pathname}?${params.toString()}`);
-		}
-	};
+			router.push(searchText.trim() ? `?${params.toString()}` : "/");
+		},
+		[router]
+	);
+
+	const handleSearch = useDebounce(updateSearch, 300);
 
 	return (
-		<TextField
-			fullWidth
-			placeholder="Search compendium..."
-			size="small"
-			onKeyDown={handleSearch}
-			defaultValue={searchParams.get("query") ?? ""}
-			disabled={isLoading}
-			InputProps={{
-				startAdornment: (
-					<InputAdornment position="start">
-						{isLoading ? (
-							<CircularProgress size={20} color="inherit" />
-						) : (
-							<SearchIcon sx={{ color: "primary.contrastText" }} />
-						)}
-					</InputAdornment>
-				),
-				sx: {
-					backgroundColor: "rgba(255, 255, 255, 0.15)",
-					"&:hover": {
-						backgroundColor: "rgba(255, 255, 255, 0.25)"
-					},
-					borderRadius: 1,
-					color: "primary.contrastText",
-					"& .MuiInputBase-input::placeholder": {
-						color: "primary.contrastText",
-						opacity: 0.7
-					}
-				}
-			}}
-			variant="outlined"
-			sx={{
-				"& .MuiOutlinedInput-notchedOutline": {
-					border: "none"
-				}
-			}}
-		/>
+		<Search>
+			<SearchIconWrapper>
+				<SearchIcon />
+			</SearchIconWrapper>
+			<StyledInputBase
+				placeholder="Search Hyrule Compendium…"
+				inputProps={{ "aria-label": "search" }}
+				onChange={(e) => handleSearch(e.target.value)}
+				defaultValue={searchParams.get(URLParams.QUERY) || ""}
+			/>
+		</Search>
 	);
 }

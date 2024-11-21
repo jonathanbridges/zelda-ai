@@ -1,10 +1,9 @@
 "use client";
 
-import { Category } from "@/enums";
+import { Category, URLParams } from "@/enums";
 import { Box, Tab, Tabs } from "@mui/material";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import CategoryIcon from "../CategoryIcon/CategoryIcon";
-import { useEffect } from "react";
 
 const categories = [
 	{ value: "", label: "All" },
@@ -22,40 +21,30 @@ function isValidCategory(category: string | null): boolean {
 
 export default function CategoryTabs() {
 	const router = useRouter();
-	const pathname = usePathname();
 	const searchParams = useSearchParams();
-	const currentCategory = searchParams.get("category");
+	const category = searchParams.get(URLParams.CATEGORY) || "all";
 
-	// Clean up invalid category from URL
-	useEffect(() => {
-		if (currentCategory && !isValidCategory(currentCategory)) {
-			const params = new URLSearchParams(searchParams);
-			params.delete("category");
-			router.replace(`${pathname}?${params.toString()}`);
-		}
-	}, [currentCategory, pathname, router, searchParams]);
+	const handleChange = (_event: React.SyntheticEvent, newValue: string) => {
+		const params = new URLSearchParams();
 
-	const handleTabChange = (category: string) => {
-		const params = new URLSearchParams(searchParams);
-
-		if (category) {
-			params.set("category", category);
-		} else {
-			params.delete("category");
+		// Only set category if it's not "all"
+		if (newValue !== "all") {
+			params.set(URLParams.CATEGORY, newValue);
 		}
 
-		router.push(`${pathname}?${params.toString()}`);
+		// Clear both page and query params by not including them
+		// The old params will be replaced with just the category (if any)
+		router.push(params.toString() ? `?${params.toString()}` : "/");
 	};
 
 	// Default to empty string if category is null or invalid
-	const validCategory =
-		currentCategory && isValidCategory(currentCategory) ? currentCategory : "";
+	const validCategory = category && isValidCategory(category) ? category : "";
 
 	return (
 		<Box sx={{ borderBottom: 1, borderColor: "divider", mb: 2 }}>
 			<Tabs
 				value={validCategory}
-				onChange={(_, value) => handleTabChange(value)}
+				onChange={handleChange}
 				variant="scrollable"
 				scrollButtons="auto"
 				aria-label="category tabs"

@@ -1,5 +1,5 @@
-import { Collection, Properties } from "weaviate-client";
-import { Category } from "./enums";
+import { Collection, GenerativeObject, Properties } from "weaviate-client";
+import { Category, URLParams } from "./enums";
 
 /* Begin API Schema Types */
 interface APIItem {
@@ -108,8 +108,15 @@ export type CompendiumCollection = Collection<
 /* End Weaviate Schema Types */
 
 export interface QueryParams {
-	query?: string;
-	category?: Category;
-	offset?: number;
-	limit?: number;
+	[URLParams.QUERY]?: string;
+	[URLParams.CATEGORY]?: Category;
+	[URLParams.PAGE]?: number;
 }
+
+export interface CompendiumData {
+	header: string;
+	objects: GenerativeObject<CompendiumItem>[];
+	totalCount: number;
+}
+
+export const ITEMS_PER_PAGE = 20;

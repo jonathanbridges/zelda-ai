@@ -6,6 +6,7 @@ import { useCompendiumData } from "@/hooks/useCompendiumData";
 import { Alert, AlertTitle } from "@mui/material";
 import CompendiumLoader from "../CompendiumLoader/CompendiumLoader";
 import Header from "../Header/Header";
+import PaginationBar from "../PaginationBar/PaginationBar";
 
 interface CompendiumGridProps {
 	hasQuery: boolean;
@@ -45,6 +46,7 @@ export default function CompendiumGrid({ hasQuery }: CompendiumGridProps) {
 					))}
 				</Grid>
 			)}
+			<PaginationBar totalCount={data?.totalCount ?? 0} />
 		</>
 	);
 }
