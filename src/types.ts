@@ -113,6 +113,10 @@ export interface QueryParams {
 	[URLParams.PAGE]?: number;
 }
 
+export interface PathParams {
+	id: string;
+}
+
 export interface CompendiumData {
 	header: string;
 	objects: GenerativeObject<CompendiumItem>[];

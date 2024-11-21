@@ -70,7 +70,10 @@ const searchCompendium = async (
 };
 
 export async function GET(request: NextRequest) {
-	const url = new URL(request.url, "http://localhost:3000");
+	const url = new URL(
+		request.url,
+		process.env.NEXT_PUBLIC_API_URL || "http://localhost:3000"
+	);
 	const searchParams = url.searchParams;
 
 	const query = searchParams.get(URLParams.QUERY);
