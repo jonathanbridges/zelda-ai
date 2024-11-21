@@ -1,7 +1,7 @@
 "use client";
 
 import { CompendiumItem } from "@/types";
-import { GenerativeObject, GenerativeReturn } from "weaviate-client";
+import { GenerativeObject } from "weaviate-client";
 import { useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
 import { useCompendiumContext } from "@/app/contexts/CompendiumContext";
@@ -32,15 +32,21 @@ export function useCompendiumData() {
 					limit: Number(searchParams.get("limit")) || undefined,
 					offset: Number(searchParams.get("offset")) || undefined
 				});
+
 				if (isMounted) {
-					setData({
-						header: result.generated || "",
-						objects: result.objects || []
-					});
+					setData(result);
 				}
 			} catch (err) {
 				if (isMounted) {
-					setError(err as Error);
+					// Parse error response if it exists
+					if (err instanceof Error) {
+						const errorResponse = await (err as any).json?.();
+						const errorMessage = errorResponse?.error || err.message;
+						console.log(err, errorMessage);
+						setError(new Error(errorMessage));
+					} else {
+						setError(new Error("An unknown error occurred"));
+					}
 					setData(null);
 				}
 			} finally {

@@ -3,7 +3,6 @@ import { APIEntryItem, CommonItemProperties } from "@/types";
 import dotenv from "dotenv";
 import weaviate, {
 	CollectionConfigCreate,
-	generative,
 	vectorizer,
 	WeaviateClient
 } from "weaviate-client";
@@ -55,6 +54,8 @@ async function importCompendiumData(client: WeaviateClient) {
 			};
 
 			switch (category) {
+				case Category.MONSTERS:
+					return { ...commonItemProperties, category };
 				case Category.EQUIPMENT:
 					const {
 						properties: { attack, defense, effect, type }

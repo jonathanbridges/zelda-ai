@@ -12,6 +12,10 @@ interface APIItem {
 	dlc: boolean;
 }
 
+interface APIMonsterItem extends APIItem {
+	category: Category.MONSTERS;
+}
+
 interface APIEquipmentItem extends APIItem {
 	category: Category.EQUIPMENT;
 	properties: {
@@ -40,6 +44,7 @@ interface APITreasureItem extends APIItem {
 }
 
 export type APIEntryItem =
+	| APIMonsterItem
 	| APIEquipmentItem
 	| APIMaterialItem
 	| APICreatureItem
@@ -56,6 +61,10 @@ export interface CommonItemProperties {
 	commonLocations: string[] | null;
 	drops: string[] | null;
 	dlc: boolean;
+}
+
+export interface MonsterItem extends CommonItemProperties {
+	category: Category.MONSTERS;
 }
 
 interface EquipmentItem extends CommonItemProperties {
@@ -84,6 +93,7 @@ interface TreasureItem extends CommonItemProperties {
 }
 
 export type CompendiumItem =
+	| MonsterItem
 	| EquipmentItem
 	| MaterialItem
 	| CreatureItem
@@ -97,8 +107,8 @@ export type CompendiumCollection = Collection<
 >;
 /* End Weaviate Schema Types */
 
-export interface SearchParams {
-	query: string;
+export interface QueryParams {
+	query?: string;
 	category?: Category;
 	offset?: number;
 	limit?: number;

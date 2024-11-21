@@ -12,7 +12,7 @@ const weaviateKey = process.env.WEAVIATE_ADMIN_KEY as string;
 const openaiKey = process.env.OPENAI_API_KEY as string;
 
 const searchCompendium = async (
-	query: string,
+	query: string = "",
 	limit: number = 10,
 	offset: number = 0,
 	category: Category | null = null
@@ -26,8 +26,7 @@ const searchCompendium = async (
 			}
 		}
 	);
-	const collection: CompendiumCollection =
-		client.collections.get("BotWCompendium");
+	const collection = client.collections.get("BotWCompendium");
 
 	let filter: FilterValue | null = null;
 	if (!!category) {

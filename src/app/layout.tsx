@@ -14,6 +14,9 @@ export default function RootLayout({
 }) {
 	return (
 		<html lang="en">
+			<head>
+				<link rel="icon" href="/main-sword-shield.png" />
+			</head>
 			<body>
 				<CompendiumProvider>
 					<ThemeRegistry>

@@ -1,5 +1,11 @@
 import Grid from "@mui/material/Grid2";
-import { Card, CardContent, Container, Skeleton } from "@mui/material";
+import {
+	Card,
+	CardMedia,
+	CardContent,
+	Container,
+	Skeleton
+} from "@mui/material";
 
 const SkeletonCard = () => (
 	<Grid
@@ -11,10 +17,17 @@ const SkeletonCard = () => (
 		}}
 	>
 		<Card>
-			<Skeleton variant="rectangular" height={140} />
+			<CardMedia>
+				<Skeleton
+					animation="wave"
+					variant="rectangular"
+					height={200}
+					sx={{ width: "100%" }}
+				/>
+			</CardMedia>
 			<CardContent>
-				<Skeleton variant="text" width="80%" />
-				<Skeleton variant="text" width="60%" />
+				<Skeleton animation="wave" variant="text" width="60%" sx={{ mb: 1 }} />
+				<Skeleton animation="wave" variant="text" width="100%" height={60} />
 			</CardContent>
 		</Card>
 	</Grid>
@@ -23,7 +36,6 @@ const SkeletonCard = () => (
 export default function CompendiumLoader() {
 	return (
 		<Container maxWidth="lg">
-			<Skeleton variant="text" width="60%" height={32} />
 			<Grid container spacing={2}>
 				{[...Array(12)].map((_, i) => (
 					<SkeletonCard key={i} />
