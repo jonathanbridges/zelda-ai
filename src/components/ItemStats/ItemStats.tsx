@@ -1,10 +1,9 @@
-import { Stack, Typography, StackProps, Paper } from "@mui/material";
-import ShieldIcon from "@mui/icons-material/Shield";
-import GavelIcon from "@mui/icons-material/Gavel";
-import HeartIcon from "@mui/icons-material/Favorite";
-import RestaurantIcon from "@mui/icons-material/Restaurant";
 import { CompendiumItem } from "@/types";
-import { Category } from "@/enums";
+import HeartIcon from "@mui/icons-material/Favorite";
+import GavelIcon from "@mui/icons-material/Gavel";
+import RestaurantIcon from "@mui/icons-material/Restaurant";
+import ShieldIcon from "@mui/icons-material/Shield";
+import { Paper, Stack, StackProps, Typography } from "@mui/material";
 
 interface ItemStatsProps extends StackProps {
 	item: CompendiumItem;

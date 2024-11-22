@@ -2,7 +2,7 @@
 
 import { Category, URLParams } from "@/enums";
 import { Box, Tab, Tabs } from "@mui/material";
-import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import CategoryIcon from "../CategoryIcon/CategoryIcon";
 
 const categories = [
@@ -22,23 +22,28 @@ function isValidCategory(category: string | null): boolean {
 export default function CategoryTabs() {
 	const router = useRouter();
 	const searchParams = useSearchParams();
-	const category = searchParams.get(URLParams.CATEGORY) || "all";
+	const currentCategory = searchParams.get(URLParams.CATEGORY) || "all";
 
 	const handleChange = (_event: React.SyntheticEvent, newValue: string) => {
-		const params = new URLSearchParams();
+		const params = new URLSearchParams(searchParams);
 
-		// Only set category if it's not "all"
-		if (newValue !== "all") {
-			params.set(URLParams.CATEGORY, newValue);
+		// Remove query and page params when changing categories
+		params.delete("query");
+		params.delete("page");
+
+		if (newValue === "") {
+			params.delete("category");
+		} else {
+			params.set("category", newValue);
 		}
 
-		// Clear both page and query params by not including them
-		// The old params will be replaced with just the category (if any)
-		router.push(params.toString() ? `?${params.toString()}` : "/");
+		const queryString = params.toString();
+		router.push(queryString ? `?${queryString}` : "/");
 	};
 
 	// Default to empty string if category is null or invalid
-	const validCategory = category && isValidCategory(category) ? category : "";
+	const validCategory =
+		currentCategory && isValidCategory(currentCategory) ? currentCategory : "";
 
 	return (
 		<Box sx={{ borderBottom: 1, borderColor: "divider", mb: 2 }}>

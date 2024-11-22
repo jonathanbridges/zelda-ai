@@ -1,8 +1,15 @@
 "use client";
 
 import { createTheme } from "@mui/material/styles";
+import { EB_Garamond } from "next/font/google";
 
-const theme = createTheme({
+const ebGaramond = EB_Garamond({
+	weight: ["400", "500", "600", "700"],
+	subsets: ["latin"],
+	display: "swap"
+});
+
+export const theme = createTheme({
 	palette: {
 		mode: "light",
 		primary: {
@@ -17,7 +24,7 @@ const theme = createTheme({
 		}
 	},
 	typography: {
-		fontFamily: "var(--font-geist-sans)",
+		fontFamily: ebGaramond.style.fontFamily,
 		h1: {
 			fontWeight: 600
 		},
@@ -26,15 +33,6 @@ const theme = createTheme({
 		},
 		h3: {
 			fontWeight: 600
-		}
-	},
-	components: {
-		MuiAppBar: {
-			styleOverrides: {
-				root: {
-					backgroundColor: "#1976d2"
-				}
-			}
 		}
 	}
 });

@@ -1,11 +1,11 @@
 "use client";
 
-import { CompendiumData, CompendiumItem } from "@/types";
+import { useCompendiumContext } from "@/app/contexts/CompendiumContext";
+import { Category, URLParams } from "@/enums";
+import { fetchCompendiumData } from "@/lib/api";
+import { CompendiumData } from "@/types";
 import { useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
-import { useCompendiumContext } from "@/app/contexts/CompendiumContext";
-import { fetchCompendiumData } from "@/lib/api";
-import { Category, URLParams } from "@/enums";
 
 export function useCompendiumData() {
 	const searchParams = useSearchParams();
@@ -37,7 +37,7 @@ export function useCompendiumData() {
 				if (isMounted) {
 					// Parse error response if it exists
 					if (err instanceof Error) {
-						const errorResponse = await (err as any).json?.();
+						const errorResponse = await (err as unknown as Response).json?.();
 						const errorMessage = errorResponse?.error || err.message;
 						console.log(err, errorMessage);
 						setError(new Error(errorMessage));
