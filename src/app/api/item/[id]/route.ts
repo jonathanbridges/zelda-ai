@@ -15,8 +15,6 @@ export async function GET(
 		return NextResponse.json({ error: "Invalid item ID" }, { status: 400 });
 	}
 
-	console.log(`Fetching item with itemId: ${itemId}`);
-
 	const client: WeaviateClient = await weaviate.connectToWeaviateCloud(
 		weaviateURL,
 		{

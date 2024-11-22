@@ -21,10 +21,6 @@ export async function GET(request: NextRequest) {
 	const limit = ITEMS_PER_PAGE;
 	const offset = (page - 1) * limit;
 
-	// Debug log
-	console.log(`API Route - URL: ${request.url}`);
-	console.log(`API Route - Page: ${page}, Offset: ${offset}, Limit: ${limit}`);
-
 	// Validate category if present
 	if (category && !isValidCategory(category)) {
 		return NextResponse.json(

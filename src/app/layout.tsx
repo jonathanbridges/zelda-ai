@@ -3,8 +3,9 @@ import ThemeRegistry from "@/components/ThemeRegistry/ThemeRegistry";
 import { CompendiumProvider } from "@/app/providers/CompendiumProvider";
 
 export const metadata = {
-	title: "Zelda Compendium",
-	description: "A comprehensive guide to The Legend of Zelda items"
+	title: "Hyrule Compendium",
+	description:
+		"A guide to all creatures, materials, equipment, monsters and treasure in Hyrule"
 };
 
 export default function RootLayout({
@@ -14,9 +15,6 @@ export default function RootLayout({
 }) {
 	return (
 		<html lang="en">
-			<head>
-				<link rel="icon" href="/main-sword-shield.png" />
-			</head>
 			<body>
 				<CompendiumProvider>
 					<ThemeRegistry>

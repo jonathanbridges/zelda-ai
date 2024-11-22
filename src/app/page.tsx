@@ -12,7 +12,7 @@ export default async function Home(pageProps: PageProps) {
 		<Container maxWidth="lg">
 			<CategoryTabs />
 			{!hasQuery && (
-				<Header text="Welcome to the Hyrule Compendium. Use the search bar to ask for items and/or use the filter tabs above!" />
+				<Header text="Welcome to the Hyrule Compendium! Search for items in Hyrule and I'll find the most relevant matches and summarize them for you. Alternatively, use the tabs above to filter items by category. Click on an item to learn more about it!" />
 			)}
 			<CompendiumGrid hasQuery={hasQuery} />
 		</Container>
