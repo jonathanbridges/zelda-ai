@@ -13,7 +13,7 @@ interface CompendiumCardProps {
 	item: CompendiumItem;
 	onSelect: (id: number) => void;
 	isSelected?: boolean;
-	priority?: boolean;
+	priority: boolean;
 }
 
 export default function CompendiumCard({

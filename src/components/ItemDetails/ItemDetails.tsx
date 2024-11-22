@@ -1,22 +1,129 @@
-import { CompendiumItem } from "@/types";
-import CloseIcon from "@mui/icons-material/Close";
+import { Category } from "@/enums";
 import {
-	Card,
-	CardContent,
-	IconButton,
-	Portal,
-	Typography
-} from "@mui/material";
+	CompendiumItem,
+	CreatureItem,
+	EquipmentItem,
+	MaterialItem
+} from "@/types";
+import CloseIcon from "@mui/icons-material/Close";
+import { Box, IconButton, Portal } from "@mui/material";
+import Grid from "@mui/material/Grid2";
 import { motion } from "framer-motion";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import ItemImage from "../ItemImage/ItemImage";
+import ItemSection from "../ItemSection/ItemSection";
+import { ItemSectionProps } from "../ItemSection/types";
+import Header from "../Header/Header";
 
 interface ItemDetailsProps {
 	item: CompendiumItem;
 	onClose: () => void;
 }
 
+function isEquipmentItem(item: CompendiumItem): item is EquipmentItem {
+	return item.category === Category.EQUIPMENT;
+}
+
+function isMaterialItem(item: CompendiumItem): item is MaterialItem {
+	return item.category === Category.MATERIALS;
+}
+
+function isCreatureItem(item: CompendiumItem): item is CreatureItem {
+	return item.category === Category.CREATURES;
+}
+
+function capitalizeFirstLetter(word: string) {
+	return word.charAt(0).toUpperCase() + word.slice(1).toLowerCase();
+}
+
+function capitalizeWords(word: string) {
+	const words = word.split(" ");
+	return words.map(capitalizeFirstLetter).join(" ");
+}
+
+function getItemDetails(item: CompendiumItem): Array<ItemSectionProps> {
+	const { name, description, itemId, commonLocations, drops, dlc } = item;
+	const itemDetails: Array<ItemSectionProps> = [
+		{
+			title: "Name",
+			content: capitalizeWords(name)
+		},
+		{ title: "Description", content: description },
+		{ title: "Common Locations", content: commonLocations || [] },
+		...(drops && drops.length > 0
+			? [{ title: "Drops", content: drops.map(capitalizeWords) }]
+			: []),
+		{ title: "DLC", content: dlc ? "Yes" : "No" },
+		{ title: "Item ID", content: itemId }
+	];
+
+	if (isEquipmentItem(item)) {
+		const { attack, defense, effect, type } = item;
+		if (attack && attack > 0) {
+			itemDetails.push({ title: "Attack", content: attack });
+		}
+		if (defense && defense > 0) {
+			itemDetails.push({ title: "Defense", content: defense });
+		}
+		if (effect) {
+			itemDetails.push({ title: "Effect", content: effect });
+		}
+		if (type) {
+			itemDetails.push({ title: "Type", content: type });
+		}
+	}
+
+	if (isMaterialItem(item)) {
+		const { heartsRecovered, cookingEffect, fuseAttackPower } = item;
+		if (heartsRecovered && heartsRecovered > 0) {
+			itemDetails.push({ title: "Hearts Recovered", content: heartsRecovered });
+		}
+		if (cookingEffect) {
+			itemDetails.push({
+				title: "Cooking Effect",
+				content: capitalizeWords(cookingEffect)
+			});
+		}
+		if (fuseAttackPower && fuseAttackPower > 0) {
+			itemDetails.push({
+				title: "Fuse Attack Power",
+				content: fuseAttackPower
+			});
+		}
+	}
+
+	if (isCreatureItem(item)) {
+		const { heartsRecovered, edible } = item;
+		if (heartsRecovered && heartsRecovered > 0) {
+			itemDetails.push({ title: "Hearts Recovered", content: heartsRecovered });
+		}
+		itemDetails.push({ title: "Edible", content: edible ? "Yes" : "No" });
+	}
+
+	return itemDetails;
+}
+
 export default function ItemDetails({ item, onClose }: ItemDetailsProps) {
+	const [aiDescription, setAiDescription] = useState<string>("");
+	const [isLoading, setIsLoading] = useState(true);
+
+	useEffect(() => {
+		const fetchAiDescription = async () => {
+			try {
+				const response = await fetch(`/api/item/${item.itemId}`);
+				const data = await response.json();
+				const { generated } = data.objects[0];
+				setAiDescription(generated);
+			} catch (error) {
+				console.error("Failed to fetch AI description:", error);
+			} finally {
+				setIsLoading(false);
+			}
+		};
+
+		fetchAiDescription();
+	}, [item.itemId]);
+
 	useEffect(() => {
 		const handleEscapeKey = (event: KeyboardEvent) => {
 			if (event.key === "Escape") {
@@ -42,58 +149,71 @@ export default function ItemDetails({ item, onClose }: ItemDetailsProps) {
 					right: "16px",
 					bottom: "16px",
 					zIndex: 1300,
-					background: "white",
 					borderRadius: "8px",
-					overflow: "auto"
+					overflow: "auto",
+					background: "white",
+					boxShadow: "0 0 20px rgba(0, 0, 0, 0.2)"
 				}}
 			>
-				<Card sx={{ height: "100%", display: "flex", flexDirection: "column" }}>
-					<ItemImage item={item} />
-					<CardContent sx={{ flexGrow: 1, overflow: "auto" }}>
-						<Typography gutterBottom variant="h5" component="h2">
-							{item.name}
-						</Typography>
-						<Typography variant="body2" color="text.secondary" paragraph>
-							{item.description}
-						</Typography>
+				<Grid
+					container
+					spacing={0}
+					sx={{ height: "100%", position: "relative" }}
+				>
+					<Grid
+						size={{ xs: 12, sm: 6 }}
+						sx={{
+							px: 4,
+							pt: 4,
+							pb: { xs: 0, md: 4 },
+							order: { xs: 1, md: 1 }
+						}}
+					>
+						<Box
+							sx={{
+								display: "flex",
+								flexDirection: "column",
+								gap: 4,
+								alignItems: "flex-start"
+							}}
+						>
+							<ItemImage item={item} priority={false} />
+							<Header text={aiDescription} isLoading={isLoading} />
+						</Box>
+					</Grid>
 
-						{/* {item.cookingEffect && (
-							<ItemSection
-								title="Cooking Effect"
-								content={item.cookingEffect}
-							/>
-						)}
-
-						{item.commonLocations && (
-							<ItemSection title="Locations" content={item.commonLocations} />
-						)}
-
-						{item.drops && <ItemSection title="Drops" content={item.drops} />}
-
-						{item.attack && (
-							<ItemSection title="Attack Power" content={item.attack} />
-						)}
-
-						{item.recoveredHearts && (
-							<ItemSection
-								title="Hearts Recovered"
-								content={item.recoveredHearts}
-							/>
-						)} */}
-					</CardContent>
+					<Grid
+						size={{ xs: 12, md: 6 }}
+						sx={{
+							overflow: "auto",
+							px: 4,
+							pb: 4,
+							pt: { xs: 0, md: 4 },
+							order: { xs: 2, md: 2 }
+						}}
+					>
+						{getItemDetails(item).map(({ title, content }) => (
+							<ItemSection key={title} title={title} content={content} />
+						))}
+					</Grid>
 
 					<IconButton
 						onClick={onClose}
 						sx={{
 							position: "absolute",
-							right: 8,
-							top: 8,
-							color: "white"
+							right: 16,
+							top: 16,
+							color: "grey.700",
+							bgcolor: "background.paper",
+							"&:hover": {
+								bgcolor: "grey.100"
+							},
+							zIndex: 1
 						}}
 					>
 						<CloseIcon />
 					</IconButton>
-				</Card>
+				</Grid>
 			</motion.div>
 		</Portal>
 	);

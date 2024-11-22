@@ -67,7 +67,7 @@ export interface MonsterItem extends CommonItemProperties {
 	category: Category.MONSTERS;
 }
 
-interface EquipmentItem extends CommonItemProperties {
+export interface EquipmentItem extends CommonItemProperties {
 	category: Category.EQUIPMENT;
 	attack: number;
 	defense: number;
@@ -75,20 +75,20 @@ interface EquipmentItem extends CommonItemProperties {
 	type: string | null;
 }
 
-interface MaterialItem extends CommonItemProperties {
+export interface MaterialItem extends CommonItemProperties {
 	category: Category.MATERIALS;
 	heartsRecovered: number;
 	cookingEffect: string;
 	fuseAttackPower: number | null;
 }
 
-interface CreatureItem extends CommonItemProperties {
+export interface CreatureItem extends CommonItemProperties {
 	category: Category.CREATURES;
 	edible: boolean;
 	heartsRecovered: number | null;
 }
 
-interface TreasureItem extends CommonItemProperties {
+export interface TreasureItem extends CommonItemProperties {
 	category: Category.TREASURE;
 }
 

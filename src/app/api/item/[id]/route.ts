@@ -9,7 +9,8 @@ export async function GET(
 	_request: NextRequest,
 	{ params }: { params: { id: string } }
 ) {
-	const itemId = parseInt(params.id, 10);
+	const { id } = await params;
+	const itemId = parseInt(id, 10);
 
 	if (isNaN(itemId)) {
 		return NextResponse.json({ error: "Invalid item ID" }, { status: 400 });
